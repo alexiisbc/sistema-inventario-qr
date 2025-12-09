@@ -1,0 +1,6 @@
+body { background-color: #f4f6f9; }
+.card { border-radius: 10px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.card-header { background-color: #343a40; color: white; border-radius: 10px 10px 0 0 !important; }
+.stock-bajo { background-color: #fff3cd !important; } /* Amarillo alerta */
+.stock-critico { background-color: #f8d7da !important; color: #721c24; font-weight: bold; } /* Rojo alerta */
+.scanner-box { width: 100%; border-radius: 8px; overflow: hidden; margin-top: 10px; }

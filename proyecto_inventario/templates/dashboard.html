@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- KPIs (Igual que antes) -->
+<div class="row mb-4 g-3">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body">
+                <h6>Total Productos</h6>
+                <h2 class="display-6 fw-bold">{{ stats.total_productos }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white h-100">
+            <div class="card-body">
+                <h6>Stock Crítico</h6>
+                <h2 class="display-6 fw-bold">{{ stats.criticos }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body">
+                <h6>Valorización</h6>
+                <h3 class="mt-2">${{ stats.valor_total }}</h3>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="d-grid gap-2 h-100">
+            <button class="btn btn-success" onclick="iniciarEscaneoContinuo('entrada')">
+                <i class="bi bi-qr-code"></i> Entrada Continua
+            </button>
+            <button class="btn btn-danger" onclick="iniciarEscaneoContinuo('salida')">
+                <i class="bi bi-qr-code"></i> Salida Continua
+            </button>
+            <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalMovimiento">
+                <i class="bi bi-pencil-square"></i> Manual
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla Productos (Igual que antes) -->
+<div class="card shadow mb-5">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Listado de Existencias</h5>
+        {% if session['rol'] == 'admin' %}
+        <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoProd"><i class="bi bi-plus-lg"></i> Nuevo</button>
+        {% endif %}
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped mb-0 align-middle">
+                <thead class="table-light">
+                    <tr><th>SKU</th><th>Producto</th><th>Cat.</th><th class="text-center">Stock</th><th>Mín</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for p in productos %}
+                    <tr class="{{ 'stock-critico' if p.stock <= p.minimo else '' }}">
+                        <td><span class="badge bg-secondary">{{ p.sku }}</span></td>
+                        <td>{{ p.nombre }}</td>
+                        <td><small>{{ p.categoria }}</small></td>
+                        <td class="text-center fw-bold">{{ p.stock }}</td>
+                        <td class="text-center">{{ p.minimo }}</td>
+                        <td>
+                            {% if session['rol'] == 'admin' %}
+                            <a href="{{ url_for('delete_product', id=p.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar?')"><i class="bi bi-trash"></i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-center">Sin datos.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL MODO CONTINUO (NUEVO DISEÑO) -->
+<div class="modal fade" id="modalScanContinuo" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" id="headerModalContinuo">
+                <h5 class="modal-title text-white">Modo Continuo</h5>
+                <button type="button" class="btn-close" onclick="cerrarModalContinuo()"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Columna Izquierda: Cámara -->
+                    <div class="col-md-7">
+                        <div id="reader-continuous" style="width: 100%; border-radius: 8px; overflow: hidden;"></div>
+                        <div class="alert alert-info mt-2 py-1 small">
+                            <i class="bi bi-info-circle"></i> La cámara sigue activa. Escanea el siguiente producto.
+                        </div>
+                    </div>
+                    
+                    <!-- Columna Derecha: Historial de la sesión -->
+                    <div class="col-md-5">
+                        <h6>Historial de esta sesión:</h6>
+                        <div class="border rounded p-2 bg-light" style="height: 300px; overflow-y: auto;">
+                            <ul id="lista-escaneados" class="list-group list-group-flush small">
+                                <!-- Aquí se agregan los items por JS -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary w-100" onclick="cerrarModalContinuo()">Terminar y Actualizar Tabla</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- OTROS MODALES (Nuevo Prod / Manual) Mantenemos igual para no romper nada -->
+<div class="modal fade" id="modalNuevoProd" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('add_product') }}" method="POST">
+                <div class="modal-header"><h5 class="modal-title">Nuevo Producto</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <input type="text" name="sku" id="sku_new" class="form-control" placeholder="SKU" required>
+                        <button type="button" class="btn btn-secondary" onclick="startScanner('sku_new', 'new')"><i class="bi bi-qr-code"></i></button>
+                    </div>
+                    <div id="scanner-container-new" class="scanner-box" style="display:none;"><div id="reader-new"></div><button type="button" class="btn btn-danger btn-sm w-100 mt-1" onclick="stopScanner('new')">Cerrar</button></div>
+                    <input type="text" name="nombre" class="form-control mb-2" placeholder="Nombre" required>
+                    <input type="number" name="precio" class="form-control mb-2" placeholder="Precio" required>
+                    <input type="text" name="categoria" class="form-control mb-2" placeholder="Categoría" required>
+                    <input type="number" name="stock" class="form-control mb-2" placeholder="Stock Inicial" value="0">
+                    <input type="number" name="minimo" class="form-control mb-2" placeholder="Mínimo" value="5">
+                </div>
+                <div class="modal-footer"><button type="submit" class="btn btn-primary">Guardar</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalMovimiento" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('movement') }}" method="POST">
+                <div class="modal-header"><h5 class="modal-title">Movimiento Manual</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <button type="button" class="btn btn-outline-dark w-100 mb-3" onclick="startScanner('sku_mov', 'mov')">Cámara</button>
+                    <div id="scanner-container-mov" class="scanner-box mb-3" style="display:none;"><div id="reader-mov"></div><button type="button" class="btn btn-danger btn-sm w-100" onclick="stopScanner('mov')">Cerrar</button></div>
+                    <input type="text" name="sku" id="sku_mov" class="form-control fw-bold mb-3" placeholder="SKU" required>
+                    <div class="row"><div class="col-6"><select name="tipo" class="form-select"><option value="entrada">Entrada</option><option value="salida">Salida</option></select></div><div class="col-6"><input type="number" name="cantidad" class="form-control" value="1" required></div></div>
+                </div>
+                <div class="modal-footer"><button type="submit" class="btn btn-dark">Registrar</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
