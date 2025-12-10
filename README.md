@@ -31,7 +31,10 @@ Plataforma web desarrollada para optimizar la gestión logística de PYMEs. Perm
 ```
 - Acceso:
   - Web: http://localhost:5000
-  - Móvil: Usar Ngrok o IP local
+  - Móvil: Usar Ngrok para crear un túnel HTTPS.
+    - Comando: ngrok http 5000
+    - Usar URL generada.
+    - Nota Importante: Los navegadores modernos, tanto en PC como en Móvil, bloquean el acceso a la cámara si el sitio no es seguro (HTTPS). Si se intenta acceder usando la IP Local, la cámara no abrirá.  
   - Credenciales Demo: Usuario: admin / Contraseña: 1234
 
  ### Diagramas UML
