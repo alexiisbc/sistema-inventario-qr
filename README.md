@@ -109,5 +109,5 @@ sequenceDiagram
     Frontend->>Bodeguero: Recarga Página (Actualiza Tabla)
 ```
 
-### Autor
+### 👤 Autor
 Manuel Alexis Becerra Cruz - Programación y Análisis de Sistemas
