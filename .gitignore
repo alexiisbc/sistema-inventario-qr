@@ -1,9 +1,17 @@
-pycache/
+# Archivos compilados de Python (CORREGIDO: lleva guiones bajos)
+__pycache__/
 *.pyc
+
+# Base de datos (Ignorar para seguridad)
 *.db
 *.sqlite3
+
+# Entornos virtuales
 .venv/
 venv/
 env/
+
+# Archivos de sistema (Mac) y Editor (VS Code)
 .DS_Store
 .vscode/
+```

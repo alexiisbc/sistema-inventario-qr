@@ -1,6 +1,6 @@
 let html5QrcodeScanner = null;
 let continuousScanner = null;
-let isProcessing = false; // "Semáforo" para no escanear doble
+let isProcessing = false;
 let tipoMovimientoActual = 'entrada';
 
 // --- MODO CONTINUO ---
@@ -8,10 +8,10 @@ let tipoMovimientoActual = 'entrada';
 async function iniciarEscaneoContinuo(tipo) {
     tipoMovimientoActual = tipo;
     
-    // 1. Configurar Modal Visualmente
+    // Configurar Modal Visualmente
     const modalHeader = document.getElementById('headerModalContinuo');
     const lista = document.getElementById('lista-escaneados');
-    lista.innerHTML = ""; // Limpiar historial anterior
+    lista.innerHTML = ""; // Limpia historial anterior
     
     if (tipo === 'entrada') {
         modalHeader.className = "modal-header bg-success text-white";
@@ -25,7 +25,7 @@ async function iniciarEscaneoContinuo(tipo) {
     const modal = new bootstrap.Modal(document.getElementById('modalScanContinuo'));
     modal.show();
 
-    // 2. Iniciar Cámara
+    // Iniciar Cámara
     if (continuousScanner) { await stopScannerInstance(continuousScanner); }
     
     continuousScanner = new Html5Qrcode("reader-continuous");
@@ -47,7 +47,7 @@ async function procesarCodigoContinuo(sku) {
     isProcessing = true;
     console.log("Procesando SKU:", sku);
 
-    // Feedback visual inmediato (Borde amarillo = Procesando)
+    // Feedback visual inmediato
     const readerDiv = document.getElementById('reader-continuous');
     readerDiv.style.border = "5px solid #ffc107"; 
 
@@ -61,11 +61,11 @@ async function procesarCodigoContinuo(sku) {
         const data = await response.json();
         
         if (data.status === 'success') {
-            // ÉXITO (Borde Verde)
+            // ÉXITO
             readerDiv.style.border = "5px solid #28a745";
             agregarAlHistorial(data.msg, 'success');
         } else {
-            // ERROR (Borde Rojo)
+            // ERROR
             readerDiv.style.border = "5px solid #dc3545";
             agregarAlHistorial(data.msg, 'danger');
         }
@@ -78,7 +78,7 @@ async function procesarCodigoContinuo(sku) {
     // Pausa de 2 segundos antes de permitir el siguiente escaneo
     setTimeout(() => {
         isProcessing = false;
-        readerDiv.style.border = "none"; // Quitar borde
+        readerDiv.style.border = "none";
     }, 2000); 
 }
 
@@ -108,7 +108,7 @@ function cerrarModalContinuo() {
 }
 
 
-// --- MODO MANUAL (Mantenemos para compatibilidad) ---
+// --- MODO MANUAL ---
 async function startScanner(inputId, type) {
     if (typeof Html5Qrcode === "undefined") return;
     document.getElementById(`scanner-container-${type}`).style.display = "block";

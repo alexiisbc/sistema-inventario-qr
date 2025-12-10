@@ -19,7 +19,7 @@ Plataforma web desarrollada para optimizar la gestión logística de PYMEs. Perm
 ### ⚙️ Instalación y Ejecución
 - Clonar el repositorio:
 ```bash
-  git clone https://github.com/alexiisbc/inventario-qr.git
+  git clone https://github.com/alexiisbc/sistema-inventario-qr.git
 ```
 - Instalar dependencias:
 ```bash
