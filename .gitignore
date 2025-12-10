@@ -1,4 +1,4 @@
-# Archivos compilados de Python (CORREGIDO: lleva guiones bajos)
+# Archivos compilados de Python
 __pycache__/
 *.pyc
 
